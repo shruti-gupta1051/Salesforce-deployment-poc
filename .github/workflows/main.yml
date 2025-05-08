@@ -1,33 +1,34 @@
-
-name: Salesforce Authentication
+name: Salesforce Auth
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
-
 jobs:
-  auth-salesforce:
+  jwt-auth:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Install Salesforce CLI
-        run: |
-          npm install --global sfdx-cli
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
 
-      - name: Authenticate to Salesforce using JWT
-        run: |
-          echo "Authenticating to Salesforce..."
-          sfdx auth:jwt:grant \
-            --clientid ${{ secrets.SF_CLIENT_ID }} \
-            --jwtkeyfile assets/server.key \
-            --username ${{ secrets.SF_USERNAME }} \
-            --instanceurl ${{ secrets.SF_INSTANCE_URL }}
+    - name: Install Salesforce CLI
+      run: npm install --global @salesforce/cli
 
-      - name: Confirm authentication
-        run: sfdx force:org:list
+    - name: Authenticate to Salesforce using JWT
+      env:
+        SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+        SF_JWT_KEY: ${{ secrets.SF_JWT_KEY }}
+        SF_USERNAME: ${{ secrets.SF_USERNAME }}
+      run: |
+        echo "$SF_JWT_KEY" > server.key
+        sf org login jwt \
+          --client-id $SF_CLIENT_ID \
+          --jwt-key-file server.key \
+          --username $SF_USERNAME \
+          --alias my-org \
+          --set-default
