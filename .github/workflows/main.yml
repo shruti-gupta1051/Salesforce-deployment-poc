@@ -2,7 +2,11 @@
 name: Salesforce Authentication
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
+
 
 jobs:
   auth-salesforce:
