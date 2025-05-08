@@ -1,0 +1,29 @@
+
+name: Salesforce Authentication
+
+on:
+  workflow_dispatch:
+
+jobs:
+  auth-salesforce:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Salesforce CLI
+        run: |
+          npm install --global sfdx-cli
+
+      - name: Authenticate to Salesforce using JWT
+        run: |
+          echo "Authenticating to Salesforce..."
+          sfdx auth:jwt:grant \
+            --clientid ${{ secrets.SF_CLIENT_ID }} \
+            --jwtkeyfile assets/server.key \
+            --username ${{ secrets.SF_USERNAME }} \
+            --instanceurl ${{ secrets.SF_INSTANCE_URL }}
+
+      - name: Confirm authentication
+        run: sfdx force:org:list
